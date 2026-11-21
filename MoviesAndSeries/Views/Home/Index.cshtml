@@ -1,0 +1,277 @@
+@using MoviesAndSeries.Models.Enums
+@model MoviesAndSeries.ViewModels.Home.HomeIndexViewModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <title>Movies &amp; Series — Home</title>
+    <script src="~/js/theme-init.js" asp-append-version="true"></script>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
+</head>
+
+<body data-set-movie-watched-url="@Url.Action("SetMovieWatched", "Home")"
+      data-set-season-watched-url="@Url.Action("SetSeasonWatched", "Home")">
+
+    <header class="topbar">
+        <nav class="nav container" aria-label="Main navigation">
+            <a class="brand" href="@Url.Action("Index", "Home")" aria-label="Movies and Series home">
+                <span class="brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <rect x="4.5" y="5.5" width="15" height="13" rx="3" stroke="currentColor" stroke-width="1.7"></rect>
+                        <path d="m10 9 5 3-5 3V9Z" fill="currentColor"></path>
+                    </svg>
+                </span>
+                <span>Movies &amp; Series</span>
+            </a>
+
+            <div class="nav-links">
+                <a class="nav-link active" href="@Url.Action("Index", "Home")" aria-current="page">Home</a>
+                <a class="nav-link" href="@Url.Action("Index", "Management")">Management</a>
+                <a class="nav-link" href="@Url.Action("Index", "Universes")">Universes</a>
+            </div>
+
+            <div class="nav-actions">
+                <a class="pdf-button"
+                   href="@Url.Action("ExportPdf", "Home")"
+                   download
+                   title="Download full archive as PDF">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M7 3.5h7l3 3v14H7a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2Z"
+                              stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path>
+                        <path d="M14 3.5V7h3M8 15.5h8M8 12h5"
+                              stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <span>PDF</span>
+                </a>
+
+                <button class="theme-toggle"
+                        id="themeToggle"
+                        type="button"
+                        aria-label="Switch to light mode"
+                        title="Toggle theme">
+                    <svg class="moon-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M20 15.2A8.5 8.5 0 0 1 8.8 4a8.5 8.5 0 1 0 11.2 11.2Z"
+                              stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path>
+                    </svg>
+                    <svg class="sun-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <circle cx="12" cy="12" r="3.7" stroke="currentColor" stroke-width="1.7"></circle>
+                        <path d="M12 2.5V5M12 19v2.5M21.5 12H19M5 12H2.5M18.7 5.3l-1.8 1.8M7.1 16.9l-1.8 1.8M18.7 18.7l-1.8-1.8M7.1 7.1 5.3 5.3"
+                              stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path>
+                    </svg>
+                    <span class="sr-only" id="themeLabel">Light mode</span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="page-head glass" aria-labelledby="pageTitle">
+            <div>
+                <p class="eyebrow">Personal Archive</p>
+                <h1 id="pageTitle">My watch collection</h1>
+                <p class="page-copy">
+                    Track movies and TV series seasons in a clean, focused view.
+                </p>
+            </div>
+
+            <span class="result-indicator" id="resultIndicator" aria-live="polite">
+                @(Model.TotalCount == 1 ? "1 title shown" : $"{Model.TotalCount} titles shown")
+            </span>
+        </section>
+
+        <section class="summary glass" aria-label="Collection summary">
+            <div class="summary-item">
+                <span class="summary-label">Total</span>
+                <strong class="summary-value">@Model.TotalCount</strong>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Movies</span>
+                <strong class="summary-value">@Model.MovieCount</strong>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Series</span>
+                <strong class="summary-value">@Model.SeriesCount</strong>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Universes</span>
+                <strong class="summary-value">@Model.UniverseCount</strong>
+            </div>
+        </section>
+
+        <section class="toolbar glass" aria-label="Search and filters">
+            <label class="search-wrap">
+                <span class="sr-only">Search titles</span>
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"></circle>
+                    <path d="m16 16 4.3 4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                </svg>
+                <input class="search-input"
+                       id="searchInput"
+                       type="search"
+                       placeholder="Search titles..."
+                       autocomplete="off" />
+                <button class="clear-search"
+                        id="clearSearch"
+                        type="button"
+                        aria-label="Clear search"
+                        hidden>
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="m7 7 10 10M17 7 7 17" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"></path>
+                    </svg>
+                </button>
+            </label>
+
+            <div class="filter-group" role="group" aria-label="Content type">
+                <button class="filter-button active" type="button" data-filter-type="all" aria-pressed="true">All</button>
+                <button class="filter-button" type="button" data-filter-type="movie" aria-pressed="false">Movies</button>
+                <button class="filter-button" type="button" data-filter-type="series" aria-pressed="false">Series</button>
+            </div>
+
+            <label class="select-wrap">
+                <span class="sr-only">Universe filter</span>
+                <select class="select-input" id="universeFilter" aria-label="Universe filter">
+                    <option value="all">All Universes</option>
+                    <option value="standalone">Standalone</option>
+                    @foreach (var universe in Model.Universes)
+                    {
+                        <option value="@universe.Id">@universe.Name</option>
+                    }
+                </select>
+                <svg class="chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="m7 9.5 5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+            </label>
+        </section>
+
+        <section aria-labelledby="collectionTitle">
+            <div class="section-header">
+                <h2 class="section-title" id="collectionTitle">Collection</h2>
+
+                <div class="section-controls">
+                    <span class="section-note">Click watch controls to update status</span>
+
+                    <label class="select-wrap sort-select-wrap">
+                        <span class="sr-only">Sort order</span>
+                        <select class="select-input sort-select" id="sortSelect" aria-label="Sort order">
+                            <option value="az" selected>A to Z</option>
+                            <option value="newest">Newest First</option>
+                        </select>
+                        <svg class="chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="m7 9.5 5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                    </label>
+                </div>
+            </div>
+
+            <div class="content-list" id="contentList">
+                @foreach (var item in Model.ContentItems)
+                {
+                    var typeKey = item.Type == ContentType.Movie ? "movie" : "series";
+                    var universeKey = item.UniverseId?.ToString() ?? "standalone";
+                    var universeName = item.UniverseName ?? "Standalone";
+                    var universeColor = item.UniverseColorHex ?? "#94A3B8";
+                    var createdAtMs = new DateTimeOffset(
+                        DateTime.SpecifyKind(item.CreatedAtUtc, DateTimeKind.Utc))
+                        .ToUnixTimeMilliseconds();
+
+                    <article class="content-row"
+                             data-content-row
+                             data-id="@item.Id"
+                             data-title="@item.Title"
+                             data-type="@typeKey"
+                             data-universe="@universeKey"
+                             data-universe-order="@(item.UniverseOrder?.ToString() ?? string.Empty)"
+                             data-created-at="@createdAtMs">
+
+                        <div class="content-info">
+                            <h3 class="content-title">@item.Title</h3>
+                            <div class="badges">
+                                <span class="badge @(item.Type == ContentType.Movie ? "type-movie" : "type-series")">
+                                    @(item.Type == ContentType.Movie ? "Movie" : "Series")
+                                </span>
+                                <span class="badge universe-badge" style="--universe-badge-color: @universeColor">
+                                    @universeName
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="row-actions">
+                            @if (item.Type == ContentType.Movie)
+                            {
+                                <button class="watched-toggle @(item.IsWatched ? "is-watched" : string.Empty)"
+                                        type="button"
+                                        data-movie-toggle="@item.Id"
+                                        data-watched="@item.IsWatched.ToString().ToLowerInvariant()"
+                                        aria-pressed="@item.IsWatched.ToString().ToLowerInvariant()">
+                                    <span class="status-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 16 16" fill="none">
+                                            <path d="m3.4 8.2 2.8 2.8 6.4-6.4"
+                                                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                        </svg>
+                                    </span>
+                                    <span data-watch-label>@(item.IsWatched ? "Watched" : "Unwatched")</span>
+                                </button>
+                            }
+                            else
+                            {
+                                <div class="season-controls" aria-label="@item.Title seasons">
+                                    @foreach (var season in item.Seasons)
+                                    {
+                                        <button class="season-toggle @(season.IsWatched ? "is-watched" : string.Empty)"
+                                                type="button"
+                                                data-season-toggle="@season.Id"
+                                                data-watched="@season.IsWatched.ToString().ToLowerInvariant()"
+                                                aria-pressed="@season.IsWatched.ToString().ToLowerInvariant()">
+                                            <span class="season-dot" aria-hidden="true">
+                                                <svg viewBox="0 0 16 16" fill="none">
+                                                    <path d="m3.4 8.2 2.8 2.8 6.4-6.4"
+                                                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                </svg>
+                                            </span>
+                                            <span>Season @season.SeasonNumber</span>
+                                        </button>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </article>
+                }
+            </div>
+
+            <div class="empty-state glass" id="emptyState" hidden>
+                <div class="empty-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.7"></circle>
+                        <path d="m15.5 15.5 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path>
+                    </svg>
+                </div>
+                <h2 id="emptyTitle">No matching titles found</h2>
+                <p id="emptyCopy">Try adjusting your search query or active filters.</p>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <span>Personal Movie &amp; Series Tracker</span>
+            <span>Home</span>
+        </footer>
+    </main>
+
+    <form id="antiForgeryForm" hidden>
+        @Html.AntiForgeryToken()
+    </form>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden>
+        <span id="toastMessage"></span>
+    </div>
+
+    <script src="~/js/home.js" asp-append-version="true"></script>
+</body>
+</html>
